@@ -2,8 +2,8 @@ import banner from "@/assets/banner.jpg";
 import Product from "@/components/Product";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { delay } from "@/lib/utils";
-import { getWixClient } from "@/lib/wix-client.base";
+import { getCollectionBySlug } from "@/wix-api/collections";
+import { queryProducts } from "@/wix-api/products";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,7 +32,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-secondary via-transparent to-transparent"></div>
         </div>
       </div>
-      <Suspense fallback={<LoadingSkeleton/>}>
+      <Suspense fallback={<LoadingSkeleton />}>
         <FeaturedProducts />
       </Suspense>
     </main>
@@ -40,20 +40,18 @@ export default function Home() {
 }
 
 async function FeaturedProducts() {
-  await delay(1000);
-  const wixClient = getWixClient();
-  const { collection } =
-    await wixClient.collections.getCollectionBySlug("featured-products");
+  // await delay(1000);
+
+  const collection = await getCollectionBySlug("featured-products");
 
   if (!collection?._id) {
     return null;
   }
 
-  const featuredProducts = await wixClient.products
-    .queryProducts()
-    .hasSome("collectionIds", [collection._id])
-    .descending("lastUpdated")
-    .find();
+  const featuredProducts = await queryProducts({
+    collectionIds: collection._id,
+  });
+  
   if (!featuredProducts.items.length) {
     return null;
   }
@@ -61,7 +59,7 @@ async function FeaturedProducts() {
   return (
     <div className="space-y-5">
       <h2 className="text-2xl font-bold">Featured Products</h2>
-      <div className="flex gap-5 grid-cols-2 flex-col sm:grid md:grid-cols-3 lg:grid-cols-4">
+      <div className="flex grid-cols-2 flex-col gap-5 sm:grid md:grid-cols-3 lg:grid-cols-4">
         {featuredProducts.items.map((product) => (
           <Product key={product._id} product={product} />
         ))}
@@ -70,12 +68,12 @@ async function FeaturedProducts() {
   );
 }
 
-
-function LoadingSkeleton(){
-
-  return <div className="flex gap-5 grid-cols-2 flex-col sm:grid md:grid-cols-3 lg:grid-cols-4 pt-12">
-    {Array.from({length: 8}).map((_ , i) =>(
-      <Skeleton key={i} className="h-[30rem] w-full" />
-    ))}
-  </div>
+function LoadingSkeleton() {
+  return (
+    <div className="flex grid-cols-2 flex-col gap-5 pt-12 sm:grid md:grid-cols-3 lg:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <Skeleton key={i} className="h-[30rem] w-full" />
+      ))}
+    </div>
+  );
 }
