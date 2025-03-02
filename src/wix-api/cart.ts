@@ -3,13 +3,11 @@ import { findVariant } from "@/lib/utils";
 import { WixClient } from "@/lib/wix-client.base";
 import { products } from "@wix/stores";
 
-export async function getCart(wixClient : WixClient) {
+export async function getCart(wixClient: WixClient) {
   try {
     return await wixClient.currentCart.getCurrentCart();
   } catch (error) {
-    if (
-      (error as any).details.applicationError.code === "OWNED_CART_NOT_FOUND"
-    ) {
+    if ((error as any).details.applicationError.code === "OWNED_CART_NOT_FOUND") {
       return null;
     } else {
       throw error;
@@ -17,7 +15,7 @@ export async function getCart(wixClient : WixClient) {
   }
 }
 
-interface AddToCardValues {
+export interface AddToCardValues {
   product: products.Product;
   selectedOptions: Record<string, string>;
   quantity: number
@@ -52,4 +50,22 @@ export async function addToCart(
       }
     ]
   })
+}
+
+export interface UpdateCartItemQuantityValues {
+  productId: string,
+  newQuantity: number
+}
+
+export async function updateCartItemQuantity(
+  wixClient: WixClient,
+  { productId, newQuantity }: UpdateCartItemQuantityValues
+) {
+  return wixClient.currentCart.updateCurrentCartLineItemQuantity([{
+    _id: productId,
+    quantity: newQuantity
+  }]);
+}
+export async function removeCartItem(wixClient: WixClient, productId: string) {
+  return wixClient.currentCart.removeLineItemsFromCurrentCart([productId]);
 }

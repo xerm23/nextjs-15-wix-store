@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @import "~react-medium-image-zoom/dist/styles.css";
 
 @layer base {

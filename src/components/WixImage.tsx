@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { media as wixMedia } from "@wix/sdk";
+import Image from "next/image";
 import { ImgHTMLAttributes } from "react";
 
 type WixImageProps = Omit<
@@ -37,5 +38,5 @@ export default function WixImage({
       : wixMedia.getImageUrl(mediaIdentifier).url
     : placeholder;
 
-  return <img src={imageUrl} alt={alt || ""} {...props} />;
+  return <Image src={imageUrl} alt={alt || ""} {...props} />;
 }
